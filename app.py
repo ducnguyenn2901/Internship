@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 import altair as alt
 
-with open("mindx_student_model_2025.pkl", "rb") as f:
+with open("mindx_student_model.pkl", "rb") as f:
     model = pickle.load(f)
 df = pd.read_excel("model.xlsx")
 df = df.reset_index(drop=True)
