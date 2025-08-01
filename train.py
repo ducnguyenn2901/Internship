@@ -7,7 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-import joblib
+import pickle
 
 def extract_subject_code(class_name):
     try:
@@ -84,12 +84,16 @@ def train_evaluate_save(df_agg, out_model='mindx_student_model_2025.pkl'):
     target      = 'total_students'
     cat_cols    = ['Center','Course Line','Subject','Class Type']
     num_cols    = ['Year','Month','Quarter','num_classes']
+
     X = df_agg[features]
     y = df_agg[target]
+
     X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)
+
     # Build & train
     pipeline = build_pipeline(cat_cols, num_cols)
     pipeline.fit(X_tr, y_tr)
+
     y_pred = pipeline.predict(X_te)
     mae  = mean_absolute_error(y_te, y_pred)
     rmse = np.sqrt(mean_squared_error(y_te, y_pred))
@@ -98,9 +102,10 @@ def train_evaluate_save(df_agg, out_model='mindx_student_model_2025.pkl'):
     print(f"MAE : {mae:.3f}")
     print(f"RMSE: {rmse:.3f}")
     print(f"R2  : {r2:.3f}")
+    with open(out_model, "wb") as f:
+        pickle.dump(pipeline, f)
 
-    # Lưu model và kết quả aggregate
-    joblib.dump(pipeline, out_model)
+
     # df_agg.to_excel("model.xlsx", index=False)
     # print(f"\n– Model đã lưu vào: {out_model}")
     # print("– Bảng aggregate đã lưu vào: model.xlsx")

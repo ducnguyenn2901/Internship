@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
-import joblib
+import pickle
 import altair as alt
 
-model = joblib.load("mindx_student_model_2025.pkl")
+with open("mindx_student_model_2025.pkl", "rb") as f:
+    model = pickle.load(f)
 df = pd.read_excel("model.xlsx")
 df = df.reset_index(drop=True)
 
