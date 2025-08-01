@@ -102,7 +102,7 @@ def train_evaluate_save(df_agg, out_model='mindx_student_model_2025.pkl'):
     print(f"MAE : {mae:.3f}")
     print(f"RMSE: {rmse:.3f}")
     print(f"R2  : {r2:.3f}")
-    with open(out_model, "wb") as f:
+    with open("mindx_student_model_2025.pkl", "wb") as f:
         pickle.dump(pipeline, f)
 
 
