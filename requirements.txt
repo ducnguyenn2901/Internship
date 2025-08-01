@@ -4,4 +4,4 @@ scikit-learn
 numpy
 openpyxl
 altair
-pickle
+pickle5
