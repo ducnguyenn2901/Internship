@@ -79,7 +79,7 @@ def build_pipeline(cat_cols, num_cols):
     ])
     return model
 
-def train_evaluate_save(df_agg, out_model='mindx_student_model_2025.pkl'):
+def train_evaluate_save(df_agg, out_model='mindx_student_model.pkl'):
     features    = ['Center','Course Line','Subject','Class Type','Year','Month','Quarter','num_classes']
     target      = 'total_students'
     cat_cols    = ['Center','Course Line','Subject','Class Type']
