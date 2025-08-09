@@ -1,8 +1,5 @@
-# import streamlit as st
-# import pandas as pd
-# import pickle
-# import altair as alt
 
+import pickle
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -14,73 +11,10 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 import altair as alt
 
-@st.cache_resource
-def train_model():
-    def extract_subject_code(class_name):
-        try:
-            match = re.search(r'-(?P<code>[A-Z]+)', class_name)
-            if match:
-                return match.group('code')
-            elif re.fullmatch(r'[A-Z]{2,}', class_name):
-                return class_name
-            else:
-                return 'Unknown'
-        except:
-            return 'Unknown'
 
-    def detect_class_type(name):
-        name = str(name).upper()
-        if 'ONLINE' in name or 'ONL' in name:
-            return 'Học online'
-        elif 'HYBRID' in name or 'HB' in name:
-            return 'Học hybrid'
-        elif '1:1' in name or '1:2' in name or '1:3' in name:
-            return None
-        match = re.search(r'\(([^)]+)\)', name)
-        if match:
-            return match.group(1).strip()
-        return 'Học tại trung tâm'
 
-    df = pd.read_excel("k12_class_data.xlsx")
-    df['Student count'] = pd.to_numeric(df['Student count'], errors='coerce').fillna(0).astype(int)
-    df['Start date'] = pd.to_datetime(df['Start date'], errors='coerce')
-    df['Year'] = df['Start date'].dt.year
-    df['Month'] = df['Start date'].dt.month
-    df['Quarter'] = df['Start date'].dt.quarter
-    df['Subject'] = df['Course'].apply(extract_subject_code)
-    df['Class Type'] = df['Class name'].apply(detect_class_type)
-    df = df[df['Class Type'].notna()]
-
-    agg = df.groupby(
-        ['Center','Course Line','Subject','Class Type','Year','Month','Quarter'], as_index=False
-    ).agg(
-        total_students=('Student count','sum'),
-        num_classes=('Class name','nunique')
-    )
-
-    features = ['Center','Course Line','Subject','Class Type','Year','Month','Quarter','num_classes']
-    target = 'total_students'
-    cat_cols = ['Center','Course Line','Subject','Class Type']
-    num_cols = ['Year','Month','Quarter','num_classes']
-
-    X = agg[features]
-    y = agg[target]
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    preprocessor = ColumnTransformer([
-        ('cat', OneHotEncoder(handle_unknown='ignore'), cat_cols),
-        ('num', 'passthrough', num_cols)
-    ])
-    pipeline = Pipeline([
-        ('preproc', preprocessor),
-        ('lr', LinearRegression())
-    ])
-    pipeline.fit(X_train, y_train)
-
-    return pipeline, agg
-model, df = train_model()
-
+with open("mindx_student_model.pkl", "rb") as f:
+    model = pickle.load(f)
 df = pd.read_excel("model.xlsx")
 df = df.reset_index(drop=True)
 
@@ -134,10 +68,10 @@ center_options = {v: k for k, v in center_map.items()}
 selected_center_name = st.selectbox("Chọn trung tâm:", sorted(center_options.keys()))
 center = center_options[selected_center_name]
 
-month_options = ['Cả năm'] + sorted(df['Month'].unique())
+month_options = ['Từ tháng 1-11'] + sorted(df['Month'].unique())
 month = st.selectbox("Chọn tháng:", month_options)
 
-if month == 'Cả năm':
+if month == 'Từ tháng 1-11':
     subset_2024 = (
         df[df['Center'] == center]
         .groupby(['Course Line', 'Subject', 'Class Type'])
@@ -200,8 +134,8 @@ else:
         }).reset_index(drop=True),
         use_container_width=True
     )
-    if month == 'Cả năm':
-        st.subheader("📈 Biểu đồ dự đoán số học sinh năm 2025")
+    if month == 'Từ tháng 1-11':
+        st.subheader("📈 Biểu đồ dự đoán số học sinh từ tháng 1-11 năm 2025")
         month_chart_df = df[df['Center'] == center].copy()
         month_chart_df['Year'] = 2025
         month_chart_df['Quarter'] = (month_chart_df['Month'] - 1) // 3 + 1
