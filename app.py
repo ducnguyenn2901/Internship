@@ -79,7 +79,9 @@ def train_model():
 
 
 with open("mindx_student_model.pkl", "rb") as f:
-    model = pickle.load(f)
+    # model = pickle.load(f)
+    model, df = train_model()
+
 df = pd.read_excel("model.xlsx")
 df = df.reset_index(drop=True)
 
