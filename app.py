@@ -46,6 +46,8 @@ def train_model():
     df['Subject'] = df['Course'].apply(extract_subject_code)
     df['Class Type'] = df['Class name'].apply(detect_class_type)
     df = df[df['Class Type'].notna()]
+    
+    df = df.dropna(subset=['Center', 'Course Line', 'Subject', 'Class Type'])
 
     agg = df.groupby(
         ['Center','Course Line','Subject','Class Type','Year','Month','Quarter'], as_index=False
@@ -73,8 +75,9 @@ def train_model():
         ('lr', LinearRegression())
     ])
     pipeline.fit(X_train, y_train)
-
+    agg = agg.dropna(subset=['Center', 'Course Line', 'Subject', 'Class Type'])
     return pipeline, agg
+
 
 
 
@@ -159,7 +162,7 @@ else:
     st.subheader("Lớp từng mở trong 2024")
     subset_2024['Course Line Name'] = subset_2024['Course Line'].map(course_line_map)
     subset_2024['Subject Name'] = subset_2024['Subject'].map(course_code_map)
-
+    subset_2024 = subset_2024.dropna()
     st.dataframe(
         subset_2024[[
             'Course Line Name', 'Subject Name', 'Class Type',
